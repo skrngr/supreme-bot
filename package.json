@@ -1,0 +1,30 @@
+{
+  "name": "supreme-bot",
+  "version": "0.1.0",
+  "description": "Bot for placing orders on supremenewyork.com utilizing Node.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skrngr/supreme-bot.git"
+  },
+  "keywords": [
+    "supreme",
+    "bot",
+    "clothing"
+  ],
+  "author": "DreamSmith",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/skrngr/supreme-bot/issues"
+  },
+  "homepage": "https://github.com/skrngr/supreme-bot#readme",
+  "dependencies": {
+    "puppeteer": "^5.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
