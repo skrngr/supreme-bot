@@ -19,11 +19,11 @@ const url = "https://www.supremenewyork.com/shop/shirts/zkmt62fz1";
     const desc = document.querySelector("#details>p:nth-child(3)").innerText;
 
     // retrieve different styles (array of colors)
-    const models = [];
+    const styles = [];
     document
       .querySelectorAll("#details>ul>li>button:first-child")
       .forEach(el => {
-        models.push(el.getAttribute("data-style-name"));
+        styles.push({ name: el.getAttribute("data-style-name") });
       });
 
     // return everything into item object
@@ -31,11 +31,11 @@ const url = "https://www.supremenewyork.com/shop/shirts/zkmt62fz1";
     return {
       name,
       desc,
-      models
+      styles
     };
   });
 
-  console.log(item.models);
+  console.log(item.styles);
 
   await browser.close();
 })();
