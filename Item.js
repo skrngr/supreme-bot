@@ -14,13 +14,13 @@ const Item = {
 
   print: _ => {
     let text = `
-      Name:   ${this.name}
-      Price:  ${this.price}
-      Desc:   ${this.desc}
-       Styles:`;
+Name:   ${this.name}
+Price:  ${this.price}
+Desc:   ${this.desc}
+Styles:`;
 
     this.styles.forEach(i => {
-      text += `\n\t    ${i.name.trim()} has ${i.sizes.length} size(s) in stock`;
+      text += `\n\t${i.name.trim()} has ${i.sizes.length} size(s) in stock`;
     });
 
     console.log(text);
