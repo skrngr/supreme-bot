@@ -2,7 +2,7 @@
   "name": "supreme-bot",
   "version": "0.1.0",
   "description": "Bot for placing orders on supremenewyork.com utilizing Node.js",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/skrngr/supreme-bot#readme",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "puppeteer": "^5.4.1"
   },
   "devDependencies": {
