@@ -14,12 +14,12 @@ class Store {
   // browser: null,
   // page: null,
 
-  init = async _ => {
-    this.browser = await puppeteer.launch({
-      headless: false
-      // args: ["--start-fullscreen"]
-    });
-  };
+  // init = async _ => {
+  //   this.browser = await puppeteer.launch({
+  //     headless: false
+  //     // args: ["--start-fullscreen"]
+  //   });
+  // };
 
   // this.pages = {
   //   cart: await this.browser.newPage(),

@@ -1,5 +1,6 @@
 {
   "name": "supreme-bot",
+  "type": "module",
   "version": "0.1.0",
   "description": "Bot for placing orders on supremenewyork.com utilizing Node.js",
   "main": "app.js",

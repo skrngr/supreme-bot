@@ -1,5 +1,5 @@
 // const Supreme = require("./Supreme");
-const Page = require("./Page");
+import Page from "./Page.js";
 
 const {
   SEL_NAME,
@@ -96,6 +96,8 @@ class Item extends Page {
   print() {
     console.log(this);
   }
+
+  watch = false;
 }
 
-module.exports = Item;
+export default Item;

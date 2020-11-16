@@ -1,33 +1,14 @@
-const readline = require("readline");
+import readline from "readline";
 
-const Item = require("./Item");
-
-const Parse = require("./utils/Parse");
-
-const Command = {
-  query: {
-    options: {
-      code: {
-        desc: "Query by code",
-        run: vals => {
-          console.log(
-            `You ran 'query' with the 'code' options with a value of ${vals} :)`
-          );
-        }
-      }
-    },
-    desc: "Query by",
-    run: async function(opt, vals) {
-      console.log("You ran 'query' with no options :)");
-    }
-  },
-  item: {}
-};
+import Parse from "../utils/Parse.js";
+import Command from "./Command.js"; // console.log(Command);
+import { Controller } from "../controllers/Supreme.js";
 
 const Prompt = {
   start: async function() {
+    await Controller.init();
     // give Prompt an input stream
-    this.read = readline.createInterface({
+    this.read = await readline.createInterface({
       input: process.stdin,
       output: process.stdout,
       prompt: "[s-b@v0.1.0] : "
@@ -35,7 +16,7 @@ const Prompt = {
     // set function to be called on "line" event (i.e. on enter)
     this.read.on("line", async d => {
       let { cmd, opt, vals } = Parse.cmd(d);
-      console.log(vals);
+      // console.log(vals);
       // pause input stream
       this.read.pause();
       // check for command
@@ -61,4 +42,4 @@ const Prompt = {
   }
 };
 
-module.exports = Prompt;
+export default Prompt;

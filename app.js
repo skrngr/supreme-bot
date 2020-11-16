@@ -1,16 +1,18 @@
-const puppeteer = require("puppeteer");
-require("dotenv").config();
-const inquirer = require("inquirer");
-const { program } = require("commander");
-program.version("0.1.0");
+import puppeteer from "puppeteer";
+import dotenv from "dotenv";
+dotenv.config();
 
-const Supreme = require("./Supreme");
-const Item = require("./Item");
+import Prompt from "./command/Prompt.js";
+import Item from "./pages/Item.js";
 
-(async _ => {
-  await Supreme.init();
-  let Shirt = await Item.create();
-  // await Shirt.load("shirt", "zkmt62fz1");
-  // await Shirt.print();
-  // await Supreme.close();
-})();
+// let Supreme = new Store();
+// let Shirt = new Item();
+
+Prompt.start();
+// Supreme.browser = puppeteer.launch({ headless: false });
+// Supreme = await puppeteer.launch({ headless: false });
+// await Supreme.init();
+// await Shirt.create(Supreme.newPage());
+// await Shirt.load("shirt", "zkmt62fz1");
+// await Shirt.print();
+// await Supreme.close();
