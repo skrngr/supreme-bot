@@ -1,0 +1,15 @@
+{
+  "types": [
+    "jackets",
+    "shirts",
+    "sweaters",
+    "sweatshirts",
+    "pants",
+    "shorts",
+    "hats",
+    "bags",
+    "accessories",
+    "shoes",
+    "skate"
+  ]
+}

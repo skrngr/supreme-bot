@@ -22,7 +22,9 @@
   },
   "homepage": "https://github.com/skrngr/supreme-bot#readme",
   "dependencies": {
+    "commander": "^6.2.0",
     "dotenv": "^8.2.0",
+    "inquirer": "^7.3.3",
     "puppeteer": "^5.4.1"
   },
   "devDependencies": {

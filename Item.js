@@ -1,9 +1,10 @@
 const Supreme = require("./Supreme");
+const fs = require("fs");
 
 const { SEL_NAME, SEL_PRICE, SEL_DESC, SEL_STYLES } = process.env;
 
 const Item = {
-  load: async code => {
+  load: async (type, code) => {
     await Supreme.nav("item", code);
 
     this.name = await Supreme.retrieve("item", SEL_NAME, "text");
