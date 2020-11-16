@@ -10,19 +10,44 @@ const SupremeContext = {
 
 const SupremeController = {
   init: async _ => {
-    SupremeContext.browser = puppeteer.launch({ headless: false });
+    SupremeContext.browser = await puppeteer.launch({ headless: false });
+    const item = new Item(0);
+    await item.create(await SupremeContext.browser.newPage());
+    SupremeContext.item = await item;
   },
+
   query: _ => {
     console.log("hello from the controller!!", SupremeContext.browser);
   },
+
   watch: {
     add: async () => {
-      SupremeContext.watch.push(SupremeContext.item);
+      SupremeContext.item.watch = true;
+      SupremeContext.watch.push(await SupremeContext.item);
       let item = new Item();
-      SupremeContext.item = await item.create(SupremeContext.browser.newPage());
+      await item.create(await SupremeContext.browser.newPage());
+      SupremeContext.item = await item;
     },
+    list: async () => {
+      let list = await SupremeContext.watch;
+      for (let i = 0; i < list.length; i++) {
+        // list[i].hasOwnProperty("emitter")
+        //   ? console.log(list[i].emitter)
+        //   : console.log("blank page");
+        console.log(list[i].watch);
+      }
+    }
+  },
+
+  cart: {
     list: () => {
-      console.log(SupremeContext.watch);
+      console.log("*cart listing*");
+    },
+    add: () => {
+      console.log("item added");
+    },
+    remove: () => {
+      console.log("item removed");
     }
   },
 

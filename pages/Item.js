@@ -43,7 +43,7 @@ class Item extends Page {
   }
 
   async create(page) {
-    this.page = await page;
+    return (this.page = await page);
   }
 
   async load(type, code) {
