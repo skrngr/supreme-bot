@@ -5,12 +5,12 @@ const { program } = require("commander");
 program.version("0.1.0");
 
 const Supreme = require("./Supreme");
-// const Item = require("./Item");
-const Prompt = require("./Prompt");
+const Item = require("./Item");
+
 (async _ => {
   await Supreme.init();
-  await Prompt.start();
-  // await Item.load("shirt", "zkmt62fz1");
-  // Item.print();
+  let Shirt = await Item.create();
+  // await Shirt.load("shirt", "zkmt62fz1");
+  // await Shirt.print();
   // await Supreme.close();
 })();
