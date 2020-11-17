@@ -16,8 +16,13 @@ const SupremeController = {
     SupremeContext.item = await item;
   },
 
-  query: _ => {
-    console.log("hello from the controller!!", SupremeContext.browser);
+  query: {
+    code: value => {
+      console.log("'query code <code>' command coming soon!");
+    },
+    type: () => {
+      console.log("'query type <term>' command coming soon!");
+    }
   },
 
   watch: {
@@ -27,6 +32,7 @@ const SupremeController = {
       let item = new Item();
       await item.create(await SupremeContext.browser.newPage());
       SupremeContext.item = await item;
+      console.log(await "item added to watch list!");
     },
     list: async () => {
       let list = await SupremeContext.watch;

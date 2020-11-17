@@ -6,14 +6,14 @@ const Command = {
     options: {
       code: {
         desc: "Query by code",
-        run: vals => {
-          Controller.query();
+        run: value => {
+          Controller.query.code(value);
         }
       }
     },
     desc: "Query by",
-    run: async function(opt, vals) {
-      console.log("You ran 'query' with no options :) *launch wizard*");
+    run: async function(opt, value) {
+      Controller.query.type();
     }
   },
 
@@ -22,14 +22,14 @@ const Command = {
     options: {
       list: {
         desc: "List current watched items",
-        run: vals => {
+        run: value => {
           Controller.watch.list();
         }
       }
     },
     desc: "Select item to watch",
     run: async function(opt, vals) {
-      Controller.watch.add();
+      await Controller.watch.add();
     }
   },
   // cart command
@@ -37,21 +37,19 @@ const Command = {
     options: {
       list: {
         desc: "",
-        run: () => console.log("'cart list' command coming soon!")
+        run: () => Controller.cart.list()
       },
       add: {
         desc: "",
-        run: () => console.log("'cart add <item>' command coming soon!")
+        run: () => Controller.cart.add()
       },
       remove: {
         desc: "",
-        run: () => console.log("'cart remove <item>' command coming soon!")
+        run: () => Controller.cart.remove()
       }
     },
     desc: "",
-    run: () => {
-      console.log("'cart' command coming soon!");
-    }
+    run: () => Controller.cart.list()
   }
 };
 
