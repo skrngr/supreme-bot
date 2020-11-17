@@ -42,9 +42,9 @@ class Item extends Page {
     this.supUrl = SUPREME_SHOP;
   }
 
-  async create(page) {
-    return (this.page = await page);
-  }
+  // async create(page) {
+  //   return (this.page = await page);
+  // }
 
   async load(type, code) {
     let url = type + "/" + code;

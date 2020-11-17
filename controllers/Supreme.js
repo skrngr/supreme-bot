@@ -5,13 +5,14 @@ import Item from "../pages/Item.js";
 const SupremeContext = {
   watch: [],
   item: null,
-  cart: null
+  cart: null,
+  shop: null
 };
 
 const SupremeController = {
   init: async _ => {
-    SupremeContext.browser = await puppeteer.launch({ headless: false });
-    const item = new Item(0);
+    SupremeContext.browser = await puppeteer.launch({ headless: 1 });
+    const item = new Item();
     await item.create(await SupremeContext.browser.newPage());
     SupremeContext.item = await item;
   },

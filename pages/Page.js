@@ -5,10 +5,8 @@ const { VP_WIDTH, VP_HEIGHT } = process.env;
 class Page {
   constructor() {}
 
-  static async create(pge) {
-    // constructor functions cannot be async so we
-    // use a separate method to do asynchronous work;
-    return new Page();
+  async create(page) {
+    return (this.page = await page);
   }
 
   // static async createBrowserPage() {
