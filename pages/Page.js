@@ -24,18 +24,22 @@ class Page {
         }
       });
     } else if (blockCss) {
-      if (
-        req.resourceType() === "stylesheet" ||
-        req.resourceType() === "font"
-      ) {
-        req.abort();
-      } else {
-        req.continue();
-      }
+      this.page.on("request", req => {
+        if (
+          req.resourceType() === "stylesheet" ||
+          req.resourceType() === "font"
+        ) {
+          req.abort();
+        } else {
+          req.continue();
+        }
+      });
     } else if (blockImages) {
-      if (req.resourceType() === "image") {
-        req.abort();
-      } else req.continue();
+      this.page.on("request", req => {
+        if (req.resourceType() === "image") {
+          req.abort();
+        } else req.continue();
+      });
     }
   }
 

@@ -1,7 +1,7 @@
 import Page from "./Page.js";
 import Item from "./Item.js";
 import Prompt from "../command/Prompt.js";
-import { Controller } from "../controllers/Supreme.js";
+import { Context, Controller } from "../controllers/Supreme.js";
 
 const {
   SUPREME_ALL,
@@ -38,7 +38,6 @@ class Store extends Page {
     // console.log(await this.categories);
     let links = await this.getHrefs(SEL_SHOP_CATS);
     await links.splice(0, 2);
-    console.log(links);
 
     let promises = [];
     for (let i = 0; i < links.length; i++) {
@@ -51,7 +50,6 @@ class Store extends Page {
           });
           await shop.setButtons();
           // get rid of /sweaters
-          console.log(links[i]);
           let key = Array.from(links[i].split("/"))
             .slice(3)
             .join("");
@@ -67,37 +65,11 @@ class Store extends Page {
       );
     }
 
-    await Promise.all(promises).catch(e => console.log("error at promises"));
-    //   if all {
-    //   for each link of links {
-    //       give promise.all a batch of promises
-    //       const
-    //   }
-    // }
-
-    // if (category === "all") {
-    //   if (restockItems === 1) {
-    //     for (let i in this.buttons) {
-    //       await this.restockItems(i);
-    //     }
-    //   } else if (restockItems === 0) {
-    //     for (let i in this.buttons) {
-    //       await this.refreshItems(i);
-    //     }
-    //   }
-    // } else if (category !== "all") {
-    //   if (restockItems === 1) {
-    //     await this.restockItems(category);
-    //   } else if (restockItems === 0) {
-    //     await this.refreshItems(category);
-    //   }
-    // }
-
-    await Prompt.write(`${this.inventory.length} items scraped!`);
-
-    // await console.log(await this.inventory);
-    //
-    // await this.refreshItems("hats");
+    await Promise.all(promises)
+      .then(() => {
+        Prompt.write(`${this.inventory.length} items scraped!`);
+      })
+      .catch(e => console.log("error at promises"));
   }
 
   // set navigation buttons for each category
@@ -185,12 +157,12 @@ class Store extends Page {
       let indexOfItem = this.inventory.findIndex(i => i.code === code);
       if (indexOfItem !== -1) {
         for (let key in item) {
-          if (this.inventory[indexOfItem][key] !== item[key]) {
-            this.inventory[indexOfItem][key] = item[key];
+          if (Context.store.inventory[indexOfItem][key] !== item[key]) {
+            Context.store.inventory[indexOfItem][key] = item[key];
           }
         }
       } else if (indexOfItem === -1) {
-        this.inventory.push(items[i]);
+        Context.store.inventory.push(items[i]);
       }
     }
   }
@@ -198,19 +170,24 @@ class Store extends Page {
   async restockItems(click, category) {
     await this.refreshItems(click, category);
     await Prompt.write(`Restocking all ${category}...`);
-    // let promises = []
+    let promises = [];
     if (category !== "skate") {
-      for (let i = 0; i < (await this.inventory.length); i++) {
-        if (this.inventory[i].type === category) {
+      for (let i = 0; i < (await Context.store.inventory.length); i++) {
+        if (Context.store.inventory[i].type === category) {
           // if any styles are available, update the item
-          for (let j of this.inventory[i].styles) {
+          for (let j of Context.store.inventory[i].styles) {
             if (j.available) {
-              await this.inventory[i].update();
+              promises.push(
+                new Promise((resolve, reject) =>
+                  resolve(Context.store.inventory[i].update())
+                )
+              );
               break;
             }
           }
         }
       }
+      await Promise.all(promises).catch(e => "error at restock");
     }
   }
 }

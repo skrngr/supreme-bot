@@ -13,7 +13,10 @@ const SupremeContext = {
 
 const SupremeController = {
   init: async _ => {
-    SupremeContext.browser = await puppeteer.launch({ headless: HEADLESS });
+    SupremeContext.browser = await puppeteer.launch({
+      headless: HEADLESS,
+      slowMo: 10
+    });
     await SupremeContext.store.create(
       await SupremeContext.browser.newPage(),
       1,
