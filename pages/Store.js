@@ -1,6 +1,7 @@
 import Page from "./Page.js";
 import Item from "./Item.js";
 import Prompt from "../command/Prompt.js";
+import { Controller } from "../controllers/Supreme.js";
 
 const {
   SUPREME_ALL,
@@ -35,24 +36,62 @@ class Store extends Page {
     await this.setButtons();
 
     // console.log(await this.categories);
+    let links = await this.getHrefs(SEL_SHOP_CATS);
+    await links.splice(0, 2);
+    console.log(links);
 
-    if (category === "all") {
-      if (restockItems === 1) {
-        for (let i in this.buttons) {
-          await this.restockItems(i);
-        }
-      } else if (restockItems === 0) {
-        for (let i in this.buttons) {
-          await this.refreshItems(i);
-        }
-      }
-    } else if (category !== "all") {
-      if (restockItems === 1) {
-        await this.restockItems(category);
-      } else if (restockItems === 0) {
-        await this.refreshItems(category);
-      }
+    let promises = [];
+    for (let i = 0; i < links.length; i++) {
+      promises.push(
+        new Promise(async (resolve, reject) => {
+          let shop = await new Store();
+          await shop.create(1, 1);
+          await shop.page.goto("https://www.supremenewyork.com" + links[i], {
+            waitUntil: "networkidle2"
+          });
+          await shop.setButtons();
+          // get rid of /sweaters
+          console.log(links[i]);
+          let key = Array.from(links[i].split("/"))
+            .slice(3)
+            .join("");
+          // get rid of /sweaters
+
+          resolve(
+            await shop.restockItems(
+              false,
+              key === "tops_sweaters" ? "tops" : key
+            )
+          );
+        })
+      );
     }
+
+    await Promise.all(promises).catch(e => console.log("error at promises"));
+    //   if all {
+    //   for each link of links {
+    //       give promise.all a batch of promises
+    //       const
+    //   }
+    // }
+
+    // if (category === "all") {
+    //   if (restockItems === 1) {
+    //     for (let i in this.buttons) {
+    //       await this.restockItems(i);
+    //     }
+    //   } else if (restockItems === 0) {
+    //     for (let i in this.buttons) {
+    //       await this.refreshItems(i);
+    //     }
+    //   }
+    // } else if (category !== "all") {
+    //   if (restockItems === 1) {
+    //     await this.restockItems(category);
+    //   } else if (restockItems === 0) {
+    //     await this.refreshItems(category);
+    //   }
+    // }
 
     await Prompt.write(`${this.inventory.length} items scraped!`);
 
@@ -67,22 +106,25 @@ class Store extends Page {
     const selector = SEL_SHOP_CATS;
     const texts = await this.getTexts(selector);
     const nodes = await this.getNodes(selector);
+    const hrefs = await this.getHrefs(selector);
     await nodes.splice(0, 2);
     await texts.splice(0, 2);
     let btns = {};
     for (let i = 0; i < texts.length; i++) {
       // get rid of /sweaters
       let key = texts[i].replace(/\/\w*./, "");
-      btns[key] = await nodes[i];
+      btns[key] = { href: hrefs[i], node: await nodes[i] };
     }
-    // console.log(await "Set category buttons.");
     this.buttons = await btns;
   }
 
-  async refreshItems(category) {
-    Prompt.write(`Refreshing all ${category}...`);
-    await this.buttons[category].click();
-    await this.timeout(2000);
+  async refreshItems(click, category) {
+    await Prompt.write(`Refreshing all ${category}...`);
+    if (click) {
+      await this.buttons[category].node.click();
+      await this.timeout(2000);
+    }
+
     await this.page.waitForSelector("#container");
     await this.setButtons();
 
@@ -153,9 +195,10 @@ class Store extends Page {
     }
   }
 
-  async restockItems(category) {
-    await this.refreshItems(category);
-    Prompt.write(`Restocking all ${category}...`);
+  async restockItems(click, category) {
+    await this.refreshItems(click, category);
+    await Prompt.write(`Restocking all ${category}...`);
+    // let promises = []
     if (category !== "skate") {
       for (let i = 0; i < (await this.inventory.length); i++) {
         if (this.inventory[i].type === category) {
