@@ -13,7 +13,7 @@ const Command = {
     },
     desc: "Query by",
     run: async function(opt, value) {
-      Controller.query.type();
+      Controller.query.category();
     }
   },
 
@@ -50,6 +50,19 @@ const Command = {
     },
     desc: "",
     run: () => Controller.cart.list()
+  },
+  //shop command
+  store: {
+    options: {
+      refresh: {
+        desc: "",
+        run: () => Controller.store.refresh()
+      },
+      restock: {
+        desc: "",
+        run: () => Controller.store.restock()
+      }
+    }
   }
 };
 

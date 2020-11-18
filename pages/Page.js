@@ -6,7 +6,7 @@ class Page {
   constructor() {}
 
   async create(page) {
-    return (this.page = await page);
+    this.page = await page;
   }
 
   // static async createBrowserPage() {
@@ -21,11 +21,22 @@ class Page {
   }
 
   async nav(pageUrl) {
-    await this.page.goto(this.supUrl + pageUrl);
+    await this.page.goto(this.supUrl + pageUrl, { waitUntil: "networkidle2" });
   }
 
   async getText(selector) {
     return await this.page.$eval(selector, el => el.innerText);
+  }
+
+  async getTexts(selector) {
+    // console.log(selector);
+    return await this.page.$$eval(selector, el => {
+      let texts = [];
+      el.forEach(node => {
+        return texts.push(node.innerText);
+      });
+      return texts;
+    });
   }
 
   async getNode(selector) {
@@ -34,6 +45,10 @@ class Page {
 
   async getNodes(selector) {
     return await this.page.$$(selector);
+  }
+
+  async timeout(time) {
+    await this.page.waitForTimeout(time);
   }
 }
 

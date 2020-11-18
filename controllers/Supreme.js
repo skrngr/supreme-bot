@@ -1,28 +1,46 @@
 import puppeteer from "puppeteer";
 
 import Item from "../pages/Item.js";
+import Store from "../pages/Store.js";
+import Category from "../pages/Category.js";
+
+let HEADLESS = parseInt(process.env.HEADLESS);
+
+const supCategories = {
+  jackets: new Category(),
+  shirts: new Category(),
+  tops: new Category(),
+  sweatshirts: new Category(),
+  pants: new Category(),
+  shorts: new Category(),
+  hats: new Category(),
+  bags: new Category(),
+  accessories: new Category(),
+  shoes: new Category(),
+  skate: new Category()
+};
 
 const SupremeContext = {
-  watch: [],
-  item: null,
-  cart: null,
-  shop: null
+  watch: [], // array of item pages currently being watched
+  item: new Item(), // current item in view (item page class)
+  cart: null, // cart page class
+  store: new Store(supCategories) // shop page class
 };
 
 const SupremeController = {
   init: async _ => {
-    SupremeContext.browser = await puppeteer.launch({ headless: 1 });
-    const item = new Item();
-    await item.create(await SupremeContext.browser.newPage());
-    SupremeContext.item = await item;
+    SupremeContext.browser = await puppeteer.launch({ headless: HEADLESS });
+    await SupremeContext.item.create(await SupremeContext.browser.newPage());
+    await SupremeContext.store.create(await SupremeContext.browser.newPage());
+    await SupremeContext.store.load("all", 0);
   },
 
   query: {
     code: value => {
       console.log("'query code <code>' command coming soon!");
     },
-    type: () => {
-      console.log("'query type <term>' command coming soon!");
+    category: () => {
+      console.log("'query category <term>' command coming soon!");
     }
   },
 
@@ -55,6 +73,18 @@ const SupremeController = {
     },
     remove: () => {
       console.log("item removed");
+    }
+  },
+
+  store: {
+    refresh: async () => {
+      console.log("you've hit the controller!!!!!");
+      await SupremeContext.store.load("all", 0);
+    },
+    restock: async () => {
+      console.log("you've hit the controller!!!!!");
+      await SupremeContext.store.load("all", 1);
+      // SupremeContext.shop.load("all", 1);
     }
   },
 

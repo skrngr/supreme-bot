@@ -11,7 +11,7 @@ const {
 } = process.env;
 
 // const Item = {
-//   load: async (type, code) => {
+//   load: async (category, code) => {
 //     await Supreme.nav("item", code);
 //
 //     this.name = await Supreme.retrieve("item", SEL_NAME, "text");
@@ -42,12 +42,13 @@ class Item extends Page {
     this.supUrl = SUPREME_SHOP;
   }
 
-  // async create(page) {
-  //   return (this.page = await page);
-  // }
+  async create(page) {
+    // make category and code optional ///////////////////////////
+    return (this.page = await page);
+  }
 
-  async load(type, code) {
-    let url = type + "/" + code;
+  async load(category, code) {
+    let url = category + "/" + code;
     await this.nav(url);
 
     this.name = await this.getText(SEL_NAME);

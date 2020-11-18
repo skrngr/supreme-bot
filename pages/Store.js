@@ -1,115 +1,105 @@
-const puppeteer = require("puppeteer");
+import Page from "./Page.js";
 
 const {
-  VP_WIDTH,
-  VP_HEIGHT,
-  SUPREME_SHOP,
-  SUPREME_CART,
-  SEL_OPTION,
-  SEL_DETAILS,
-  SEL_STYLES
+  SUPREME_ALL,
+  SEL_SHOP_CAT,
+  SEL_SHOP_CATS,
+  SEL_SOLD_OUT_TAG,
+  SEL_SHOP_ITEMS
 } = process.env;
 
-class Store {
-  // browser: null,
-  // page: null,
+class Store extends Page {
+  constructor(categoriesObj) {
+    super();
+    this.categories = categoriesObj;
+    this.supUrl = SUPREME_ALL;
+  }
 
-  // init = async _ => {
-  //   this.browser = await puppeteer.launch({
-  //     headless: false
-  //     // args: ["--start-fullscreen"]
-  //   });
-  // };
+  async load(category, restockItems) {
+    // navigate to SUREME_ALL
 
-  // this.pages = {
-  //   cart: await this.browser.newPage(),
-  //   watch: await this.browser.newPage(), // for watching items later on
-  //   item: await this.browser.newPage()
-  // };
+    if (this.page._frameManager._mainFrame._url === "about:blank") {
+      console.log(`Loading store page...`);
+    } else {
+      console.log("Refreshing store page...");
+    }
 
-  // setVP: _ => {
-  //   for (let i in this.pages) {
-  //     this.pages[i].setViewport({
-  //       width: parseInt(VP_WIDTH),
-  //       height: parseInt(VP_HEIGHT)
-  //     });
-  //   }
-  // },
+    await this.page.goto(this.supUrl, { waitUntil: "networkidle2" });
+    await console.log(`Store page loaded at: ${this.supUrl}`);
+    // console.log(await this.page);
 
-  // nav: async (page, url) => {
-  //   switch (page) {
-  //     case "item":
-  //       await this.pages.item.goto(SUPREME_SHOP + url, {
-  //         waitUntil: "networkidle2"
-  //       });
-  //       await this.pages.item.waitForSelector(SEL_DETAILS);
-  //       break;
-  //     case "cart":
-  //       await this.pages.cart.goto(SUPREME_CART, {
-  //         waitUntil: "networkidle2"
-  //       });
-  //       break;
-  //     case "watch":
-  //       await this.pages.watch.goto(SUPREME_SHOP + url, {
-  //         waitUntil: "networkidle2"
-  //       });
-  //       break;
-  //   }
-  // },
+    await this.setButtons();
 
-  close = async _ => await this.browser.close();
+    // console.log(await this.categories);
 
-  // retrieve: (page, selector, retrieve) => {
-  //   switch (page) {
-  //     case "item":
-  //       page = this.pages.item;
-  //       break;
-  //   }
+    if (category === "all") {
+      if (restockItems === 1) {
+        for (let i in this.categories) {
+          await this.restockItems(i);
+        }
+      } else if (restockItems === 0) {
+        for (let i in this.categories) {
+          await this.refreshItems(i);
+        }
+      }
+    } else if (category !== "all") {
+      if (restockItems === 1) {
+        await this.restockItems(category);
+      } else if (restockItems === 0) {
+        await this.refreshItems(category);
+      }
+    }
+  }
+
+  // set navigation buttons for each category
+  async setButtons() {
+    // console.log("Setting category buttons...");
+    const selector = SEL_SHOP_CATS;
+    const texts = await this.getTexts(selector);
+    const nodes = await this.getNodes(selector);
+    await nodes.splice(0, 2);
+    await texts.splice(0, 2);
+    for (let i = 0; i < texts.length; i++) {
+      // get rid of /sweaters
+      let key = texts[i].replace(/\/\w*./, "");
+      this.categories[key]["button"] = await nodes[i];
+    }
+    // console.log(await "Set category buttons.");
+  }
+
+  async getItemInfo() {
+    console.log("getting item info...");
+  }
+
+  async refreshItems(category) {
+    // get all the on-page item info of all items in a certain category
+    // creates an array of item classes and stores them inside of the
+    // this.categories[<category>].inventory property. if the item class
+    // does not already exist, then make it. and each item class that gets made
+    // will receive the following from this method:
+    //                    name (string), category (string),
+    //                    thumbnail (string,url), available (bool)
+    // await this.categories[category].button.click();
+    // await this.page.timeout(30);
+    // console.log(await `Refreshed ${category}.`);
+  }
+
+  async restockItems(category) {
+    // get all off-page item info of all items in a certain category
+    // updates all of this.categories[<category>].inventory's array with
+    // their respective "stock" properties,
+    await this.refreshItems(category);
+    // await this.categories[category].button.click();
+    // await this.page.timeout(30);
+
+    // let items = await this.getNodes(SEL_SHOP_ITEMS);
+
+    // console.log(await `Restocked ${category}.`);
+  }
   //
-  //   switch (retrieve) {
-  //     case "text":
-  //       return page.$eval(selector, el => el.innerText);
-  //       break;
-  //     case "nodes":
-  //       return page.$$(SEL_STYLES);
-  //     default:
-  //       return page.$(selector);
-  //       break;
-  //   }
-  // },
-
-  // getStyles: async _ => {
-  //   let styleButtons = await this.pages.item.$$(SEL_STYLES);
-  //
-  //   await this.pages.item.evaluate(SEL_OPTION => {
-  //     window.getSizes = () => {
-  //       const sizes = [];
-  //       const options = document.querySelectorAll("#s>option");
-  //       for (let i = 0; i < options.length; i++) {
-  //         sizes.push(options[i].innerText);
-  //       }
-  //       return sizes;
-  //     };
-  //   });
-  //
-  //   let styles = [];
-  //
-  //   for (let i in styleButtons) {
-  //     let btn = styleButtons[i];
-  //     await btn.click();
-  //     await this.pages.item.waitForTimeout(100);
-  //     styles.push(
-  //       await this.pages.item.evaluate(btn => {
-  //         return {
-  //           name: btn.getAttribute("data-style-name"),
-  //           sizes: [...getSizes()]
-  //         };
-  //       }, btn)
-  //     );
-  //   }
-  //
-  //   return styles;
-  // }
 }
 
-module.exports = Store;
+bench: {
+}
+
+export default Store;

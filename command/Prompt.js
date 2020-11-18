@@ -6,12 +6,16 @@ import { Controller } from "../controllers/Supreme.js";
 
 const Prompt = {
   start: async function() {
+    console.clear();
+    console.log("Welcome to the supreme-bot CLI tool!\n");
+    console.log("Starting bot...");
     await Controller.init();
+    await console.log("Bot started! You know what to do. \n\n");
     // give Prompt an input stream
     this.read = await readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: "[s-b@v0.1.0] : "
+      prompt: "[supreme@v0.1.0] : "
     });
     // set function to be called on "line" event (i.e. on enter)
     this.read.on("line", async d => {
@@ -23,6 +27,8 @@ const Prompt = {
       if (Command.hasOwnProperty(cmd)) {
         if (Command[cmd].options.hasOwnProperty(opt)) {
           await Command[cmd].options[opt].run(vals);
+        } else if (!Command[cmd].options.hasOwnProperty(opt)) {
+          Prompt.write(`Invalid argument "${opt}" for ${cmd}`);
         } else {
           await Command[cmd].run();
         }

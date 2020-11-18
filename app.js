@@ -1,6 +1,5 @@
 import puppeteer from "puppeteer";
-import dotenv from "dotenv";
-dotenv.config();
+import "./loadEnv.js";
 
 import Prompt from "./command/Prompt.js";
 import Item from "./pages/Item.js";
