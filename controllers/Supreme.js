@@ -2,37 +2,28 @@ import puppeteer from "puppeteer";
 
 import Item from "../pages/Item.js";
 import Store from "../pages/Store.js";
-import Category from "../pages/Category.js";
 
 let HEADLESS = parseInt(process.env.HEADLESS);
 
-const supCategories = {
-  jackets: new Category(),
-  shirts: new Category(),
-  tops: new Category(),
-  sweatshirts: new Category(),
-  pants: new Category(),
-  shorts: new Category(),
-  hats: new Category(),
-  bags: new Category(),
-  accessories: new Category(),
-  shoes: new Category(),
-  skate: new Category()
-};
-
 const SupremeContext = {
   watch: [], // array of item pages currently being watched
-  item: new Item(), // current item in view (item page class)
   cart: null, // cart page class
-  store: new Store(supCategories) // shop page class
+  store: new Store() // shop page class
 };
 
 const SupremeController = {
   init: async _ => {
     SupremeContext.browser = await puppeteer.launch({ headless: HEADLESS });
-    await SupremeContext.item.create(await SupremeContext.browser.newPage());
-    await SupremeContext.store.create(await SupremeContext.browser.newPage());
-    await SupremeContext.store.load("all", 0);
+    await SupremeContext.store.create(
+      await SupremeContext.browser.newPage(),
+      1,
+      1
+    );
+    await SupremeContext.store.load("all", 1);
+  },
+
+  newPage: async () => {
+    return await SupremeContext.browser.newPage();
   },
 
   query: {
@@ -55,12 +46,6 @@ const SupremeController = {
     },
     list: async () => {
       let list = await SupremeContext.watch;
-      for (let i = 0; i < list.length; i++) {
-        // list[i].hasOwnProperty("emitter")
-        //   ? console.log(list[i].emitter)
-        //   : console.log("blank page");
-        console.log(list[i].watch);
-      }
     }
   },
 
@@ -78,7 +63,9 @@ const SupremeController = {
 
   store: {
     refresh: async () => {
-      console.log("you've hit the controller!!!!!");
+      // console.log("you've hit the controller!!!!!");
+      // .load() needs to be turned into a method for updating
+      // the inventory
       await SupremeContext.store.load("all", 0);
     },
     restock: async () => {
@@ -90,33 +77,5 @@ const SupremeController = {
 
   close: async () => SupremeContext.browser.close()
 };
-
-// const Supreme = {
-//   init: async function() {
-//     this.browser = await puppeteer.launch({
-//       headless: false
-//       // args: ["--start-fullscreen"]
-//     });
-//   },
-//
-//   context: {
-//     watch: [],
-//     cart: {
-//       items: null
-//     }
-//   },
-//
-//   pages: {
-//     item: null,
-//     cart: null,
-//     watch: []
-//   },
-//
-
-//
-//   name: "g",
-//
-//
-// };
 
 export { SupremeContext as Context, SupremeController as Controller };

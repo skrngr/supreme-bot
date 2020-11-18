@@ -10,7 +10,7 @@ const Prompt = {
     console.log("Welcome to the supreme-bot CLI tool!\n");
     console.log("Starting bot...");
     await Controller.init();
-    await console.log("Bot started! You know what to do. \n\n");
+    await console.log("\n\nBot started!\n\n");
     // give Prompt an input stream
     this.read = await readline.createInterface({
       input: process.stdin,
@@ -20,7 +20,6 @@ const Prompt = {
     // set function to be called on "line" event (i.e. on enter)
     this.read.on("line", async d => {
       let { cmd, opt, vals } = Parse.cmd(d);
-      // console.log(vals);
       // pause input stream
       this.read.pause();
       // check for command

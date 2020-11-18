@@ -7,91 +7,50 @@ const {
   SEL_DESC,
   SEL_STYLES,
   SUPREME_SHOP,
-  ATTR_STYLE_NAME
+  ATTR_STYLE_NAME,
+  SEL_OPTIONS
 } = process.env;
 
-// const Item = {
-//   load: async (category, code) => {
-//     await Supreme.nav("item", code);
-//
-//     this.name = await Supreme.retrieve("item", SEL_NAME, "text");
-//     this.price = await Supreme.retrieve("item", SEL_PRICE, "text");
-//     this.desc = await Supreme.retrieve("item", SEL_DESC, "text");
-//     this.styles = await Supreme.getStyles();
-//   },
-//
-//   print: _ => {
-//     let text = `
-// Name:   ${this.name}
-// Price:  ${this.price}
-// Desc:   ${this.desc}
-// Styles:`;
-//
-//     this.styles.forEach(i => {
-//       text += `\n\t${i.name.trim()} has ${i.sizes.length} size(s) in stock`;
-//     });
-//
-//     console.log(text);
-//   }
-// };
-
 class Item extends Page {
-  constructor() {
+  constructor(name, code, type, styles, price, desc) {
     // super(page);
     super();
     this.supUrl = SUPREME_SHOP;
   }
 
-  async create(page) {
-    // make category and code optional ///////////////////////////
-    return (this.page = await page);
+  async getStyles() {
+    let styleButtons = await this.page.$$(SEL_STYLES);
+
+    let styles = [];
+
+    if (styleButtons) {
+      for (let i = 0; i < styleButtons.length; i++) {
+        let btn = await styleButtons[i];
+        await btn.click();
+        await this.timeout(100);
+        let sizes = await this.getTexts(SEL_OPTIONS);
+
+        let style = await this.page.evaluate(btn => {
+          return {
+            name: btn.getAttribute("data-style-name")
+          };
+        }, btn);
+
+        style.sizes = [...sizes];
+        styles.push(style);
+      }
+      return styles;
+    }
   }
 
-  async load(category, code) {
-    let url = category + "/" + code;
+  async update() {
+    await this.create();
+    let url = this.category + "/" + this.code;
     await this.nav(url);
-
-    this.name = await this.getText(SEL_NAME);
     this.price = await this.getText(SEL_PRICE);
     this.desc = await this.getText(SEL_DESC);
     this.styles = await this.getStyles();
-  }
-
-  async getStyles() {
-    // let styleButtons = await this.pages.$$(SEL_STYLES);
-    //
-    // let styles = [];
-    //
-    // for (let i in styleButtons) {
-    //   let btn = styleButtons[i];
-    //   await btn.click();
-    //   await this.page.waitForTimeout(100);
-    //   let sizes = await this.getSizes();
-    //   styles.push(
-    //     await this.page.$$eval(
-    //       btn,
-    //       btn,
-    //       sizes,
-    //       sel => {
-    //         return {
-    //           name: btn.getAttribute(ATTR_STYLE_NAME),
-    //           sizes: [...sizes]
-    //         };
-    //       },
-    //       [btn, sizes, ATTR_STYLE_NAME]
-    //     )
-    //   );
-    // }
-    return "styles";
-  }
-
-  async getSizes() {
-    const sizes = [];
-    const options = await this.page.$$eval(SEL_OPTIONS, options => {
-      for (let i = 0; i < options.length; i++) {
-        sizes.push(options[i].innerText);
-      }
-    });
+    await this.close();
   }
 
   print() {

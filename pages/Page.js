@@ -1,17 +1,58 @@
-// const Supreme = require("./Supreme");
+import { Controller } from "../controllers/Supreme.js";
 
 const { VP_WIDTH, VP_HEIGHT } = process.env;
 
 class Page {
   constructor() {}
 
-  async create(page) {
-    this.page = await page;
+  async create(blockImages, blockCss) {
+    this.page = await Controller.newPage();
+
+    if (blockImages || blockCss) {
+      await this.page.setRequestInterception(true);
+    }
+    if (blockCss && blockImages) {
+      this.page.on("request", req => {
+        if (
+          req.resourceType() === "stylesheet" ||
+          req.resourceType() === "font" ||
+          req.resourceType() === "image"
+        ) {
+          req.abort();
+        } else {
+          req.continue();
+        }
+      });
+    } else if (blockCss) {
+      if (
+        req.resourceType() === "stylesheet" ||
+        req.resourceType() === "font"
+      ) {
+        req.abort();
+      } else {
+        req.continue();
+      }
+    } else if (blockImages) {
+      if (req.resourceType() === "image") {
+        req.abort();
+      } else req.continue();
+    }
   }
 
-  // static async createBrowserPage() {
-  //   return await
-  // }
+  async close() {
+    await this.page.close();
+  }
+
+  // tbh idk if this does anything useful
+  async removeTransition() {
+    await this.page.evaluate(() => {
+      let nodes = document.querySelectorAll("*");
+      for (let i of nodes) {
+        i.style.transition = "none";
+        i.style.opacity = "1";
+      }
+    });
+  }
 
   async setVP() {
     await this.page.setViewPort({
@@ -29,13 +70,22 @@ class Page {
   }
 
   async getTexts(selector) {
-    // console.log(selector);
     return await this.page.$$eval(selector, el => {
       let texts = [];
       el.forEach(node => {
         return texts.push(node.innerText);
       });
       return texts;
+    });
+  }
+
+  async getHrefs(selector) {
+    return await this.page.$$eval(selector, el => {
+      let attr = [];
+      el.forEach(node => {
+        return attr.push(node.getAttribute("href"));
+      });
+      return attr;
     });
   }
 
