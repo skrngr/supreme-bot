@@ -7,53 +7,62 @@ class Page {
   constructor() {}
 
   async create(blockImages, blockCss) {
+    blockImages = true;
+    blockCss = false;
     this.page = await Controller.newPage();
-
-    blockImages = 1;
-    blockCss = 0;
 
     if (blockImages || blockCss) {
       await this.page.setRequestInterception(true);
     }
-    if (blockCss && blockImages) {
-      this.page.on("request", req => {
-        if (
-          req.resourceType() === "stylesheet" ||
-          req.resourceType() === "font" ||
-          req.resourceType() === "image"
-        ) {
-          req.abort();
-        } else {
-          req.continue();
-        }
-      });
-    } else if (blockCss) {
-      this.page.on("request", req => {
-        if (
-          req.resourceType() === "stylesheet" ||
-          req.resourceType() === "font"
-        ) {
-          req.abort();
-        } else {
-          req.continue();
-        }
-      });
-    } else if (blockImages) {
-      this.page.on("request", req => {
-        if (req.resourceType() === "image") {
-          req.abort();
-        } else req.continue();
-      });
-    }
+    // if (blockCss && blockImages) {
+    // this.page.on("request", async req => {
+    //   if (
+    //     req.resourceType() == "stylesheet" ||
+    //     req.resourceType() == "font" ||
+    //     req.resourceType() == "image"
+    //   ) {
+    //     await req.abort();
+    //   } else {
+    //     await req.continue();
+    //   }
+    // });
+    // } else if (blockCss) {
+    //   this.page.on("request", async req => {
+    //     if (
+    //       req.resourceType() === "stylesheet" ||
+    //       req.resourceType() === "font"
+    //     ) {
+    //       await req.abort();
+    //     } else {
+    //       await req.continue();
+    //     }
+    //   });
+    // } else if (blockImages) {
+    //   this.page.on("request", req => {
+    //     if (req.resourceType() === "image") {
+    //       req.abort();
+    //     } else {
+    //       req.continue();
+    //     }
+    //   });
+    // }
   }
 
+  tries = 0;
+
   async promiseToLoad(suffix, tries, timeout) {
+    function resetTries(x) {
+      this.tries = x;
+    }
+
+    let updateTries = resetTries.bind(this);
+
     let promise;
-    let i = 0;
+
     let name = this.name;
-    if (i <= tries) {
-      i++;
-      let promise = await await this.page
+
+    if (this.tries <= tries) {
+      let promise = await this.page
         .goto(this.supUrl === suffix ? suffix : this.supUrl + suffix, {
           waitUntil: "networkidle2",
           timeout: timeout
@@ -61,20 +70,22 @@ class Page {
         .then(
           async res => {
             await Prompt.write(`Loaded ${name} page...`);
-            i = 0;
+            updateTries(0);
             return res;
           },
           async rej => {
             console.log(
               `Failed to load ${name} page, timed out. But I'm retrying...`
             );
-            return await promiseToUpdate();
+            updateTries(this.tries + 1);
+            await this.promiseToLoad();
+            return rej;
           }
         );
     } else {
       promise = new Promise((res, rej) =>
-        reject(
-          `FAILED TO LOAD ${this.name.toUppercase()} PAGE, EXCEED TIMEOUT LIMIT OF ${timeout}`
+        rej(
+          `FAILED TO LOAD ${this.name.toUpperCase()} PAGE, EXCEED TIMEOUT LIMIT OF ${tries}`
         )
       );
     }

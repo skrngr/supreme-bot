@@ -180,23 +180,38 @@ class Store extends Page {
     await this.refreshItems(click, category);
     await Prompt.write(`Restocking all ${category}...`);
     let promises = [];
+    let toBeUpdated = [];
     if (category !== "skate") {
       for (let i = 0; i < (await Context.store.inventory.length); i++) {
         if ((await Context.store.inventory[i].type) === category) {
           // if any styles are available, update the item
           for (let j of await Context.store.inventory[i].styles) {
             if (await j.available) {
-              promises.push(
-                new Promise(async (resolve, reject) =>
-                  resolve(await Context.store.inventory[i].update())
-                )
-              );
+              // promises.push(
+              //   new Promise((resolve, reject) =>
+              //     resolve(Context.store.inventory[i].update())
+              //     // console.log("promise made")
+              //   )
+              // );
+              toBeUpdated.push(i);
               break;
             }
           }
         }
       }
-      await Promise.all(promises).catch(e => "error at restock");
+      for (let i = 0; i < toBeUpdated.length; i += 5) {
+        let current = toBeUpdated.slice(i, i + 5);
+        for (let j = 0; j < 5; j++) {
+          promises.push(
+            new Promise((resolve, reject) => {
+              resolve(Context.store.inventory[toBeUpdated[i]].update());
+            })
+          );
+          await Promise.all([promises]);
+          promises = await [];
+        }
+        // await Promise.all(promises).catch(e => "error at restock");
+      }
     }
   }
 }
