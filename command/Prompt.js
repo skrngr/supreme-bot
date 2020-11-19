@@ -6,10 +6,6 @@ import { Controller } from "../controllers/Supreme.js";
 
 const Prompt = {
   start: async function() {
-    console.clear();
-    console.log("Welcome to the supreme-bot CLI tool!\n");
-    console.log("Starting bot...");
-    await Controller.init();
     await console.log("\n\nBot started!\n\n");
 
     // await console.log(await Controller.store.inventory);
@@ -42,6 +38,12 @@ const Prompt = {
     });
 
     this.read.prompt();
+  },
+
+  greet: async function() {
+    console.clear();
+    console.log("Welcome to the supreme-bot CLI tool!\n");
+    console.log("Starting bot...");
   },
 
   write: text => {

@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 
 import Item from "../pages/Item.js";
 import Store from "../pages/Store.js";
+import Prompt from "../command/Prompt.js";
 
 let HEADLESS = parseInt(process.env.HEADLESS);
 
@@ -13,6 +14,7 @@ const SupremeContext = {
 
 const SupremeController = {
   init: async _ => {
+    Prompt.greet();
     SupremeContext.browser = await puppeteer.launch({
       headless: HEADLESS,
       slowMo: 10
@@ -22,7 +24,7 @@ const SupremeController = {
       1,
       1
     );
-    return await SupremeContext.store.load("all", 1);
+    await SupremeContext.store.load("all", 1).then(res => Prompt.start());
   },
 
   newPage: async () => {

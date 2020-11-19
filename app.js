@@ -1,7 +1,8 @@
 import puppeteer from "puppeteer";
 import "./loadEnv.js";
 
-import Prompt from "./command/Prompt.js";
-import Item from "./pages/Item.js";
+import { Controller } from "./controllers/Supreme.js";
 
-Prompt.start();
+(async () => {
+  await Controller.init();
+})();

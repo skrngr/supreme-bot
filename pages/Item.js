@@ -57,6 +57,7 @@ class Item extends Page {
       this.styles = await this.getStyles();
       this.desc = await this.getText(SEL_DESC);
       this.price = await this.getText(SEL_PRICE);
+      await this.close();
     }
 
     let func = getInfo.bind(this);

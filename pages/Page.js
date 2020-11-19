@@ -12,40 +12,40 @@ class Page {
     this.page = await Controller.newPage();
 
     if (blockImages || blockCss) {
-      await this.page.setRequestInterception(true);
+      this.page.setRequestInterception(true);
     }
-    // if (blockCss && blockImages) {
-    // this.page.on("request", async req => {
-    //   if (
-    //     req.resourceType() == "stylesheet" ||
-    //     req.resourceType() == "font" ||
-    //     req.resourceType() == "image"
-    //   ) {
-    //     await req.abort();
-    //   } else {
-    //     await req.continue();
-    //   }
-    // });
-    // } else if (blockCss) {
-    //   this.page.on("request", async req => {
-    //     if (
-    //       req.resourceType() === "stylesheet" ||
-    //       req.resourceType() === "font"
-    //     ) {
-    //       await req.abort();
-    //     } else {
-    //       await req.continue();
-    //     }
-    //   });
-    // } else if (blockImages) {
-    //   this.page.on("request", req => {
-    //     if (req.resourceType() === "image") {
-    //       req.abort();
-    //     } else {
-    //       req.continue();
-    //     }
-    //   });
-    // }
+    if (blockCss && blockImages) {
+      this.page.on("request", async req => {
+        if (
+          (await req.resourceType()) === "stylesheet" ||
+          (await req.resourceType()) === "font" ||
+          (await req.resourceType()) === "image"
+        ) {
+          await req.abort();
+        } else {
+          await req.continue();
+        }
+      });
+    } else if (blockCss) {
+      this.page.on("request", async req => {
+        if (
+          (await req.resourceType()) === "stylesheet" ||
+          (await req.resourceType()) === "font"
+        ) {
+          await req.abort();
+        } else {
+          await req.continue();
+        }
+      });
+    } else if (blockImages) {
+      this.page.on("request", async req => {
+        if ((await req.resourceType()) === "image") {
+          await req.abort();
+        } else {
+          await req.continue();
+        }
+      });
+    }
   }
 
   tries = 0;

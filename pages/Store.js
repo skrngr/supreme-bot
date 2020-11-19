@@ -48,17 +48,18 @@ class Store extends Page {
             let shop = await new Store();
             let key = Array.from(links[i].split("/"))
               .slice(3)
-              .join("");
+              .join("")
+              .replace(/_(\w)*/, "");
             shop.name = key;
             await shop.create(1, 1);
             await shop.promiseToLoad(links[i], 3, 120000);
             await shop.setButtons();
 
             resolve(
-              await shop
+              shop
                 .restockItems(false, key === "tops_sweaters" ? "tops" : key)
                 .then(async () => {
-                  console.log("restocked");
+                  Prompt.write(`Restocked ${key}.`);
                   await shop.close();
                 })
             );
@@ -66,7 +67,7 @@ class Store extends Page {
         );
       }
 
-      return await Promise.all(promises)
+      await Promise.all(promises)
         .then(() => {
           Prompt.write(`${this.inventory.length} Supreme items scraped!`);
         })
