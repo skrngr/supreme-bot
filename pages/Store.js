@@ -29,47 +29,101 @@ class Store extends Page {
       console.log("Refreshing store page...");
     }
 
-    await this.page.goto(this.supUrl, { waitUntil: "networkidle2" });
-    await console.log(`Store page loaded at: ${this.supUrl}`);
-    // console.log(await this.page);
+    this.tries = 0;
+    let resetTries = _ => {
+      this.tries = 0;
+    };
+    resetTries.bind(this);
 
-    await this.setButtons();
-
-    // console.log(await this.categories);
-    let links = await this.getHrefs(SEL_SHOP_CATS);
-    await links.splice(0, 2);
-
-    let promises = [];
-    for (let i = 0; i < links.length; i++) {
-      promises.push(
-        new Promise(async (resolve, reject) => {
-          let shop = await new Store();
-          await shop.create(1, 1);
-          await shop.page.goto("https://www.supremenewyork.com" + links[i], {
-            waitUntil: "networkidle2"
-          });
-          await shop.setButtons();
-          // get rid of /sweaters
-          let key = Array.from(links[i].split("/"))
-            .slice(3)
-            .join("");
-          // get rid of /sweaters
-
-          resolve(
-            await shop.restockItems(
-              false,
-              key === "tops_sweaters" ? "tops" : key
-            )
+    let promiseToUpdate = async _ => {
+      let promise;
+      if (this.tries <= 5) {
+        this.tries++;
+        let promise = await await this.page
+          .goto(this.supUrl, { waitUntil: "networkidle2", timeout: 120000 })
+          // .then(async function() {
+          //   await this.timeout(10);
+          //   this.price = await this.getText(SEL_PRICE);
+          //   this.desc = await this.getText(SEL_DESC);
+          //   this.styles = await this.getStyles();
+          //   await console.log("updated: " + this.name);
+          //   await this.close();
+          // })
+          .then(
+            function(res) {
+              console.log("updated shop page...");
+              resetTries();
+              return res;
+            },
+            async function(rej) {
+              console.log("failed to load shop page, trying again: " + rej);
+              return await promiseToUpdate();
+            }
           );
-        })
-      );
-    }
+      } else {
+        promise = new Promise((res, rej) =>
+          reject("Failed to load shop page. timed out 5 times")
+        );
+      }
 
-    await Promise.all(promises)
-      .then(() => {
-        Prompt.write(`${this.inventory.length} items scraped!`);
-      })
-      .catch(e => console.log("error at promises"));
+      return promise;
+
+      // return a promise
+    };
+
+    let func = promiseToUpdate;
+    func.bind(this);
+    await func().then(
+      async res => {
+        await this.setButtons();
+
+        // console.log(await this.categories);
+        let links = await this.getHrefs(SEL_SHOP_CATS);
+        await links.splice(0, 2);
+
+        let promises = [];
+        for (let i = 0; i < links.length; i++) {
+          promises.push(
+            new Promise(async (resolve, reject) => {
+              let shop = await new Store();
+              await shop.create(1, 1);
+              await shop.page.goto(
+                "https://www.supremenewyork.com" + links[i],
+                {
+                  waitUntil: "networkidle2"
+                }
+              );
+              await shop.setButtons();
+              // get rid of /sweaters
+              let key = Array.from(links[i].split("/"))
+                .slice(3)
+                .join("");
+              // get rid of /sweaters
+
+              resolve(
+                await shop.restockItems(
+                  false,
+                  key === "tops_sweaters" ? "tops" : key
+                )
+              );
+            })
+          );
+        }
+
+        await Promise.all(promises)
+          .then(() => {
+            Prompt.write(`${this.inventory.length} items scraped!`);
+          })
+          .catch(e => console.log("error at promises"));
+      },
+      reject => {
+        console.log(reject);
+      }
+    );
+
+    // await this.page.goto(this.supUrl, { waitUntil: "networkidle2" });
+    // await console.log(`Store page loaded at: ${this.supUrl}`);
+    // console.log(await this.page);
   }
 
   // set navigation buttons for each category

@@ -8,6 +8,9 @@ class Page {
   async create(blockImages, blockCss) {
     this.page = await Controller.newPage();
 
+    blockImages = 1;
+    blockCss = 0;
+
     if (blockImages || blockCss) {
       await this.page.setRequestInterception(true);
     }
@@ -66,7 +69,9 @@ class Page {
   }
 
   async nav(pageUrl) {
-    await this.page.goto(this.supUrl + pageUrl, { waitUntil: "networkidle2" });
+    return await this.page.goto(this.supUrl + pageUrl, {
+      waitUntil: "networkidle2"
+    });
   }
 
   async getText(selector) {
