@@ -1,4 +1,5 @@
 import { Controller } from "../controllers/Supreme.js";
+import Prompt from "../command/Prompt.js";
 
 const { VP_WIDTH, VP_HEIGHT } = process.env;
 
@@ -44,6 +45,41 @@ class Page {
         } else req.continue();
       });
     }
+  }
+
+  async promiseToLoad(suffix, tries, timeout) {
+    let promise;
+    let i = 0;
+    let name = this.name;
+    if (i <= tries) {
+      i++;
+      let promise = await await this.page
+        .goto(this.supUrl === suffix ? suffix : this.supUrl + suffix, {
+          waitUntil: "networkidle2",
+          timeout: timeout
+        })
+        .then(
+          async res => {
+            await Prompt.write(`Loaded ${name} page...`);
+            i = 0;
+            return res;
+          },
+          async rej => {
+            console.log(
+              `Failed to load ${name} page, timed out. But I'm retrying...`
+            );
+            return await promiseToUpdate();
+          }
+        );
+    } else {
+      promise = new Promise((res, rej) =>
+        reject(
+          `FAILED TO LOAD ${this.name.toUppercase()} PAGE, EXCEED TIMEOUT LIMIT OF ${timeout}`
+        )
+      );
+    }
+
+    return promise;
   }
 
   async close() {

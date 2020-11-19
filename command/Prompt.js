@@ -11,6 +11,8 @@ const Prompt = {
     console.log("Starting bot...");
     await Controller.init();
     await console.log("\n\nBot started!\n\n");
+
+    // await console.log(await Controller.store.inventory);
     // give Prompt an input stream
     this.read = await readline.createInterface({
       input: process.stdin,

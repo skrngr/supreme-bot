@@ -22,7 +22,7 @@ const SupremeController = {
       1,
       1
     );
-    await SupremeContext.store.load("all", 1);
+    return await SupremeContext.store.load("all", 1);
   },
 
   newPage: async () => {

@@ -10,18 +10,22 @@ const {
   SEL_SOLD_OUT_TAG,
   SEL_SHOP_ITEMS,
   SEL_SHOP_LINKS,
-  SEL_SHOP_STYLES
+  SEL_SHOP_STYLES,
+  SUPREME
 } = process.env;
 
 class Store extends Page {
   constructor() {
     super();
-    this.supUrl = SUPREME_ALL;
+    this.supUrl = SUPREME;
     this.inventory = [];
   }
 
   async load(category, restockItems) {
     // navigate to SUREME_ALL
+
+    this.name = "Supreme Startup";
+    this.supUrl = SUPREME_ALL;
 
     if (this.page._frameManager._mainFrame._url === "about:blank") {
       console.log(`Loading store page...`);
@@ -29,97 +33,48 @@ class Store extends Page {
       console.log("Refreshing store page...");
     }
 
-    this.tries = 0;
-    let resetTries = _ => {
-      this.tries = 0;
-    };
-    resetTries.bind(this);
+    await this.promiseToLoad(this.supUrl, 10, 60000);
+    try {
+      await this.setButtons();
 
-    let promiseToUpdate = async _ => {
-      let promise;
-      if (this.tries <= 5) {
-        this.tries++;
-        let promise = await await this.page
-          .goto(this.supUrl, { waitUntil: "networkidle2", timeout: 120000 })
-          // .then(async function() {
-          //   await this.timeout(10);
-          //   this.price = await this.getText(SEL_PRICE);
-          //   this.desc = await this.getText(SEL_DESC);
-          //   this.styles = await this.getStyles();
-          //   await console.log("updated: " + this.name);
-          //   await this.close();
-          // })
-          .then(
-            function(res) {
-              console.log("updated shop page...");
-              resetTries();
-              return res;
-            },
-            async function(rej) {
-              console.log("failed to load shop page, trying again: " + rej);
-              return await promiseToUpdate();
-            }
-          );
-      } else {
-        promise = new Promise((res, rej) =>
-          reject("Failed to load shop page. timed out 5 times")
+      // console.log(await this.categories);
+      let links = await this.getHrefs(SEL_SHOP_CATS);
+      await links.splice(0, 2);
+
+      let promises = [];
+      for (let i = 0; i < links.length; i++) {
+        promises.push(
+          new Promise(async (resolve, reject) => {
+            let shop = await new Store();
+            let key = Array.from(links[i].split("/"))
+              .slice(3)
+              .join("");
+            shop.name = key;
+            await shop.create(1, 1);
+            await shop.promiseToLoad(links[i], 3, 120000);
+            await shop.setButtons();
+
+            resolve(
+              await shop
+                .restockItems(false, key === "tops_sweaters" ? "tops" : key)
+                .then(async () => {
+                  console.log("restocked");
+                  await shop.close();
+                })
+            );
+          })
         );
       }
 
-      return promise;
-
-      // return a promise
-    };
-
-    let func = promiseToUpdate;
-    func.bind(this);
-    await func().then(
-      async res => {
-        await this.setButtons();
-
-        // console.log(await this.categories);
-        let links = await this.getHrefs(SEL_SHOP_CATS);
-        await links.splice(0, 2);
-
-        let promises = [];
-        for (let i = 0; i < links.length; i++) {
-          promises.push(
-            new Promise(async (resolve, reject) => {
-              let shop = await new Store();
-              await shop.create(1, 1);
-              await shop.page.goto(
-                "https://www.supremenewyork.com" + links[i],
-                {
-                  waitUntil: "networkidle2"
-                }
-              );
-              await shop.setButtons();
-              // get rid of /sweaters
-              let key = Array.from(links[i].split("/"))
-                .slice(3)
-                .join("");
-              // get rid of /sweaters
-
-              resolve(
-                await shop.restockItems(
-                  false,
-                  key === "tops_sweaters" ? "tops" : key
-                )
-              );
-            })
-          );
-        }
-
-        await Promise.all(promises)
-          .then(() => {
-            Prompt.write(`${this.inventory.length} items scraped!`);
-          })
-          .catch(e => console.log("error at promises"));
-      },
-      reject => {
-        console.log(reject);
-      }
-    );
+      return await Promise.all(promises)
+        .then(() => {
+          Prompt.write(`${this.inventory.length} Supreme items scraped!`);
+        })
+        .catch(e => Prompt.write(`ERROR INITIALIZING INVENTORY: \n\t\t${e}`));
+    } catch (e) {
+      Prompt.write(`FAILURE LOADING INITIAL SHOP PAGE:\n\t\t${e}`);
+      return e;
+    }
 
     // await this.page.goto(this.supUrl, { waitUntil: "networkidle2" });
     // await console.log(`Store page loaded at: ${this.supUrl}`);
@@ -227,13 +182,13 @@ class Store extends Page {
     let promises = [];
     if (category !== "skate") {
       for (let i = 0; i < (await Context.store.inventory.length); i++) {
-        if (Context.store.inventory[i].type === category) {
+        if ((await Context.store.inventory[i].type) === category) {
           // if any styles are available, update the item
-          for (let j of Context.store.inventory[i].styles) {
-            if (j.available) {
+          for (let j of await Context.store.inventory[i].styles) {
+            if (await j.available) {
               promises.push(
-                new Promise((resolve, reject) =>
-                  resolve(Context.store.inventory[i].update())
+                new Promise(async (resolve, reject) =>
+                  resolve(await Context.store.inventory[i].update())
                 )
               );
               break;

@@ -1,5 +1,6 @@
 // const Supreme = require("./Supreme");
 import Page from "./Page.js";
+import Prompt from "../command/Prompt.js";
 
 const {
   SEL_NAME,
@@ -12,7 +13,7 @@ const {
 } = process.env;
 
 class Item extends Page {
-  constructor(name, code, type, styles, price, desc) {
+  constructor() {
     // super(page);
     super();
     this.supUrl = SUPREME_SHOP;
@@ -22,62 +23,47 @@ class Item extends Page {
     let styleButtons = await this.page.$$(SEL_STYLES);
 
     let styles = [];
+    let promises = [];
 
-    if (styleButtons) {
-      for (let i = 0; i < styleButtons.length; i++) {
-        let btn = await styleButtons[i];
-        await btn.click();
-        await this.timeout(100);
-        let sizes = await this.getTexts(SEL_OPTIONS);
+    return new Promise(async (res, rej) => {
+      if (styleButtons) {
+        for (let i = 0; i < styleButtons.length; i++) {
+          let btn = await styleButtons[i];
+          await btn.click();
+          await this.timeout(100);
+          let sizes = await this.getTexts(SEL_OPTIONS);
 
-        let style = await this.page.evaluate(btn => {
-          return {
-            name: btn.getAttribute("data-style-name")
-          };
-        }, btn);
+          let style = await this.page.evaluate(btn => {
+            return {
+              name: btn.getAttribute("data-style-name")
+            };
+          }, await btn);
 
-        style.sizes = [...sizes];
-        styles.push(style);
+          style.sizes = [...sizes];
+          styles.push(style);
+        }
       }
-      return styles;
-    }
+      res(await styles);
+    });
   }
 
   async update() {
     let tries = 0;
-    console.log("updating: " + this.name);
+    Prompt.write(`Updating ${this.name}...`);
     await this.create();
     let url = this.category + "/" + this.code;
 
-    async function promiseToUpdate() {
-      if (this.tries <= 5) {
-        this.tries++;
-        let promise = await this.nav(url)
-          // .try(async function() {
-          //   await this.timeout(10);
-          //   this.price = await this.getText(SEL_PRICE);
-          //   this.desc = await this.getText(SEL_DESC);
-          //   this.styles = await this.getStyles();
-          //   await console.log("updated: " + this.name);
-          //   await this.close();
-          // })
-          .try(function() {
-            console.log("updated " + this.name + "...");
-            this.tries = 0;
-          })
-          .catch(async function() {
-            return await this.update();
-          });
-      } else {
-        let promise = "unable to load " + this.name;
-      }
-
-      return promise;
-
-      // return a promise
+    async function getInfo() {
+      this.styles = await this.getStyles();
+      this.desc = await this.getText(SEL_DESC);
+      this.price = await this.getText(SEL_PRICE);
     }
 
-    return promiseToUpdate();
+    let func = getInfo.bind(this);
+
+    return await this.promiseToLoad(this.code, 3, 60000).then(async res => {
+      await func();
+    });
 
     // let promiseToUpdate = newPromise(async (rfunction()eject) => {
     //   async function keepTrying() {
