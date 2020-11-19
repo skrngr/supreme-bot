@@ -30,9 +30,10 @@ Bot for placing orders on supremenewyork.com utilizing Node.js
   - [ ] method for query by keyword
 - [x] methods for retrieving and updating a snapshot of the entire Supreme inventory
 - [x] methods for updating individual item info
-- [ ] refactor into Promise.all([]) where possible
+- [x] refactor into Promise.all([]) where possible
 - [ ] add prompt output color
 - [ ] add prompt output formatting
+- [ ] batch & optimize page loads
 
 
 ## Features-to-add:
